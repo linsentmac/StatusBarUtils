@@ -1,85 +1,68 @@
-PhotoSelect
+StatusBarUtils
 ====
 
-What is The PhotoSelect?
+What is The StatusBarUtils?
 ----
 
-##### PhotoSelect is a choice photo and take photo library that loading your ablum's photo with quickly. 
+##### StatusBarUtils is a display immersion tools of the status bar 
 
-![Example Img](https://github.com/linsentmac/PhotoSelect/raw/master/photo/example.png)
 
-How to compile the library?
+
+How to use the tools?
 ----
 
-Add it to your build.gradle with:
+Add it to your BasicActivity title layout:
 
-*project build.gradle*
+<include layout="@layout/status_layout"/>
+
+*status_layout.xml*
+```
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/statusBg" />
+
+</RelativeLayout>
+```
+
+
+and add it to BasicActivity:
 
 ```
-allprojects {
-    repositories {
-        maven {
-            url "https://jitpack.io"
-        }
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    StatusUtils.setWindowLayout(getWindow());
+    super.onCreate(savedInstanceState);
+
+    tv_status = (TextView) findViewById(R.id.tv_status);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        tv_status.setHeight(StatusUtils.getStatusHeight(this));
+        tv_status.setVisibility(View.VISIBLE);
+    } else {
+        tv_status.setHeight(0);
+        tv_status.setVisibility(View.GONE);
     }
 }
 ```
 
+and extends BasicActivity in MainActivity
 
-and:
-
-*module build.gradle*
 
 ```
-dependencies {
-    compile 'com.github.jitpack:android-example:{latest version}'
+public class MainActivity extends BaseActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        setContentView(R.layout.activity_main);
+        super.onCreate(savedInstanceState);
+        tv_status.setBackgroundResource(R.color.statusBg);
+    }
 }
 ```
 
-How to use PhotoSelect?
-----
-
-> start Activity
-
-
-```
-PhotoPicker.builder()
-    	.setPhotoCount(20)
-	.setShowCamera(true)
-	.setSelected(selectedPhotos)
-	.start(UploadImgActivity.this);
-```
-
-> Select Photo Callback
-
-
-```
-@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-	super.onActivityResult(requestCode, resultCode, data);
-	if (resultCode == RESULT_OK
-		&& (requestCode == PhotoPicker.REQUEST_CODE || requestCode == PhotoPreview.REQUEST_CODE)) {
-
-		List<String> photos = null;
-		String cam_path = null;
-		if (data != null) {
-			photos = data.getStringArrayListExtra(PhotoPicker.KEY_SELECTED_PHOTOS);
-			cam_path = data.getStringExtra("callback_path");
-		}
-
-		if (photos != null) {
-		    selectedPhotos.clear();
-		    selectedPhotos.addAll(photos);
-		    if(photos.size() > 0){
-			 btn_add_no_img.setVisibility(View.GONE);
-			 btn_add_img.setVisibility(View.VISIBLE);
-		    }
-		}
-
-		if(cam_path != null){
-		    selectedPhotos.add(cam_path);
-		}
-		    adapter.notifyDataSetChanged();
-	}
-}
-```
